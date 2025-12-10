@@ -35,7 +35,7 @@ class URLSecurityEnvironment:
         # Reward structure (adjusted for better precision/recall balance)
         self.reward_tp = 2.5   # True Positive: attack & BLOCK (increased)
         self.reward_tn = 0.5   # True Negative: benign & ALLOW
-        self.reward_fp = -4.0  # False Positive: benign & BLOCK (less penalty to reduce over-blocking)
+        self.reward_fp = -5.0  # False Positive: benign & BLOCK (less penalty to reduce over-blocking)
         self.reward_fn = -8.0  # False Negative: attack & ALLOW (keep high penalty)
         
         # Environment state

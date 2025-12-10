@@ -30,7 +30,7 @@ def evaluate_agent(agent, env, data_preparator, test_data, verbose=True):
     # Reward structure (same as environment - updated for better balance)
     reward_tp = 2.5
     reward_tn = 0.5
-    reward_fp = -4.0
+    reward_fp = -5.0
     reward_fn = -8.0
     
     for idx, row in test_data.iterrows():
@@ -120,7 +120,7 @@ def evaluate_baseline(baseline, test_data, verbose=True):
     # Reward structure (same as environment - updated for better balance)
     reward_tp = 2.5
     reward_tn = 0.5
-    reward_fp = -4.0
+    reward_fp = -5.0
     reward_fn = -8.0
     
     # Calculate rewards

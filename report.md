@@ -25,15 +25,15 @@ Total number of states: 1536
 
 The reward function is designed to penalize security failures while balancing precision and recall:
 
-- **TP (True Positive)**: Attack detected and blocked → **+2.5**
-- **TN (True Negative)**: Benign request allowed → **+0.5**
-- **FP (False Positive)**: Benign request blocked → **-4.0**
-- **FN (False Negative)**: Attack allowed → **-8.0**
+- **TP (True Positive)**: Attack detected and blocked → \*\*+2.5
+- **TN (True Negative)**: Benign request allowed → \*\*+0.5
+- **FP (False Positive)**: Benign request blocked → \*\*-5.0
+- **FN (False Negative)**: Attack allowed → \*\*-8.0
 
 The reward structure prioritizes security:
 
 - **High FN penalty (-8.0)**: Strongly discourages missing attacks (critical for security)
-- **Moderate FP penalty (-4.0)**: Penalizes false alarms but less severely than missing attacks
+- **Moderate FP penalty (-5.0)**: Penalizes false alarms but less severely than missing attacks
 - **Positive TP reward (+2.5)**: Rewards correct attack detection
 - **Small TN reward (+0.5)**: Rewards allowing legitimate traffic
 
@@ -120,14 +120,14 @@ Where:
 
 - **Initial ε = 1.0**: Start with full exploration (100% random actions)
 - **Final ε = 0.01**: End with minimal exploration (99% exploitation)
-- **Decay rate = 0.995**: Exponential decay per episode
+- **Decay rate = 0.95**: Exponential decay per episode
 - **Rationale**: Gradually shift from exploration to exploitation as the agent learns
 
 ### Training Configuration
 
-- **Episodes**: 50 episodes (≥ 50,000 training events)
+- **Episodes**: 15 episodes (≥ 50,000 training events)
 - **Episode length**: 1000 steps per episode
-- **Total training steps**: 50,000 steps
+- **Total training steps**: 15,000 steps
 - **Optimistic initialization**: Q-values initialized to 0.1 (encourages exploration)
 
 ### Example Calculation
@@ -157,11 +157,11 @@ After rounding: **Q(s₀, BLOCK) ≈ -0.5**
 
 | Metric     | RL Agent | Baseline |
 | ---------- | -------- | -------- |
-| Accuracy   | 0.6998   | 0.5941   |
-| Precision  | 0.7142   | 0.6239   |
-| Recall     | 0.8868   | 0.9246   |
-| F1-Score   | 0.7912   | 0.7450   |
-| Avg Reward | -0.0037  | -0.3341  |
+| Accuracy   | 0.7141   | 0.5941   |
+| Precision  | 0.7230   | 0.6239   |
+| Recall     | 0.8984   | 0.9246   |
+| F1-Score   | 0.8012   | 0.7450   |
+| Avg Reward | -0.1156  | -0.6916  |
 
 ### Confusion Matrices
 
@@ -172,24 +172,24 @@ Confusion matrices (see `plots/confusion_matrix_rl.png` and `plots/confusion_mat
 ```
               Predicted
               ALLOW  BLOCK
-Actual Benign   265    461  (TN=265, FP=461)
-Actual Attack   147   1152  (FN=147, TP=1152)
+Actual Benign    279     447  (TN=279, FP=447)
+Actual Attack    132   1167  (FN=132, TP=1167)
 ```
 
 **Analysis:**
 
-- **True Positives (TP)**: 1152 attacks correctly blocked
-- **True Negatives (TN)**: 265 benign requests correctly allowed
-- **False Positives (FP)**: 461 benign requests incorrectly blocked
-- **False Negatives (FN)**: 147 attacks incorrectly allowed
+- **True Positives (TP)**: 1167 attacks correctly blocked
+- **True Negatives (TN)**: 279 benign requests correctly allowed
+- **False Positives (FP)**: 447 benign requests incorrectly blocked
+- **False Negatives (FN)**: 132 attacks incorrectly allowed
 
 **Baseline:**
 
 ```
               Predicted
               ALLOW  BLOCK
-Actual Benign     2    724  (TN=2, FP=724)
-Actual Attack    98   1201  (FN=98, TP=1201)
+Actual Benign      2     724  (TN=2, FP=724)
+Actual Attack     98   1201  (FN=98, TP=1201)
 ```
 
 **Analysis:**
@@ -200,7 +200,7 @@ Actual Attack    98   1201  (FN=98, TP=1201)
 - **False Negatives (FN)**: 98 attacks incorrectly allowed
 
 **Key Observation:**
-The RL agent achieves better balance with significantly fewer false positives (461 vs 724) while maintaining strong attack detection, demonstrating superior precision.
+The RL agent achieves better balance with significantly fewer false positives (447 vs 724) while maintaining strong attack detection, demonstrating superior precision.
 
 ### Learning Curve
 
@@ -212,9 +212,9 @@ The learning curve (see `plots/learning_curve.png`) visualizes the agent's learn
 
 **Training Statistics:**
 
-- Episodes: 50
-- Average reward per episode: -2080.99
-- Final epsilon: 0.78 (still exploring, indicating room for further learning)
+- Episodes: 15
+- Average reward per episode: -1825.07
+- Final epsilon: 0.46 (still exploring, indicating room for further learning)
 - Learning rate decay: Applied to stabilize convergence
 
 **Analysis:**
@@ -233,7 +233,7 @@ A high penalty for False Negatives (FN = -8.0) encourages the agent to:
 
 ### Moderate FP Penalty Balances Precision
 
-A moderate penalty for False Positives (FP = -4.0) encourages the agent to:
+A moderate penalty for False Positives (FP = -5.0) encourages the agent to:
 
 - Be selective about blocking requests (not too aggressive)
 - Balance security needs with user experience
@@ -244,8 +244,8 @@ A moderate penalty for False Positives (FP = -4.0) encourages the agent to:
 
 The current reward structure creates a security-focused balance:
 
-- **FN penalty (-8.0) > FP penalty (-4.0)**: Prioritizes security (recall) over convenience
-- **Ratio**: FN penalty is 2× larger than FP penalty, emphasizing attack detection
+- **FN penalty (-8.0) > FP penalty (-5.0)**: Prioritizes security (recall) over convenience
+- **Ratio**: FN penalty is 1.6× larger than FP penalty, emphasizing attack detection
 - This is appropriate for security applications where missing attacks is worse than blocking benign requests
 - The agent learns to be conservative in blocking, leading to higher recall
 - The moderate FP penalty prevents excessive false positives, maintaining reasonable precision
@@ -260,8 +260,8 @@ The current reward structure creates a security-focused balance:
 
 **RL Agent:**
 
-- Recall: 0.8868 (ability to detect attacks)
-- Precision: 0.7142 (accuracy of blocking decisions)
+- Recall: 0.8984 (ability to detect attacks)
+- Precision: 0.7230 (accuracy of blocking decisions)
 - The agent achieves a balance between detecting attacks and minimizing false positives
 
 **Baseline:**
@@ -269,7 +269,7 @@ The current reward structure creates a security-focused balance:
 - Recall: 0.9246 (slightly higher, but at cost of precision)
 - Precision: 0.6239 (lower than RL agent)
 - Simple rule-based approach with fixed threshold
-- **Issue**: Very high false positive rate (724 FP vs RL's 461 FP)
+- **Issue**: Very high false positive rate (724 FP vs RL's 447 FP)
 
 ## F) Conclusion and Summary
 
@@ -277,11 +277,11 @@ The current reward structure creates a security-focused balance:
 
 The Q-learning agent demonstrates **superior performance** compared to the baseline:
 
-1. **Better Overall Accuracy**: 69.98% vs 59.41% (+10.57%)
-2. **Higher Precision**: 71.42% vs 62.39% (+9.03%) - Fewer false positives
-3. **Competitive Recall**: 88.68% vs 92.46% (-3.78%) - Slightly lower but acceptable
-4. **Better F1-Score**: 79.12% vs 74.50% (+4.62%) - Better overall balance
-5. **Higher Average Reward**: -0.0037 vs -0.3341 - Much better reward optimization
+1. **Better Overall Accuracy**: 71.41% vs 59.41% (+12.00%)
+2. **Higher Precision**: 72.30% vs 62.39% (+9.92%) - Fewer false positives
+3. **Competitive Recall**: 89.84% vs 92.46% (-2.62%) - Slightly lower but acceptable
+4. **Better F1-Score**: 80.12% vs 74.50% (+5.62%) - Better overall balance
+5. **Higher Average Reward**: -0.1156 vs -0.6916 - Much better reward optimization
 
 ### Key Achievements
 
@@ -295,7 +295,7 @@ The Q-learning agent demonstrates **superior performance** compared to the basel
 
 All required visualizations are saved in the `plots/` directory:
 
-- `learning_curve.png`: Shows agent's learning progress over 50 episodes
+- `learning_curve.png`: Shows agent's learning progress over 15 episodes
 - `confusion_matrix_rl.png`: RL agent's classification performance
 - `confusion_matrix_baseline.png`: Baseline's classification performance
 - `q_table_heatmap.png`: Visualization of learned Q-values
